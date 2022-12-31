@@ -9,7 +9,6 @@ const manageServiceSchema = new mongoose.Schema({
     },
     providerID:{
         type : ObjectID,
-        required:[true,'ProviderID required'],
         trim:true
     },
     serviceID:{

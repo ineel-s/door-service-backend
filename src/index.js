@@ -19,7 +19,9 @@ app.use('/category', require('./routes/serviceCategory.routes'));
 
 app.use('/service',require('./routes/service.routes'));
 
-app.use('/user',require('./routes/user.routes'))
+app.use('/user',require('./routes/user.routes'));
+
+app.use('/bookingservice',require('./routes/manageservice.routes'));
 
 connect()
     .then(()=>{
