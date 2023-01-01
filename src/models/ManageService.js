@@ -1,18 +1,19 @@
-const {ObjectID} = require('mongodb');
 const mongoose = require('mongoose');
+
+
 
 const manageServiceSchema = new mongoose.Schema({
     userID:{
-        type : ObjectID,
+        type : mongoose.Schema.Types.ObjectId,
         required:[true,'UserId required'],
         trim:true
     },
     providerID:{
-        type : ObjectID,
+        type : mongoose.Schema.Types.ObjectId,
         trim:true
     },
     serviceID:{
-        type : ObjectID,
+        type : mongoose.Schema.Types.ObjectId,
         required: [true,'ServiceID required'],
         trim:true
     },
@@ -52,7 +53,7 @@ const manageServiceSchema = new mongoose.Schema({
     },
     isCanceledBy: {
         type: String,
-        enum: ['customer', 'provider', 'admin']
+        enum: ['customer', 'provider', 'admin',]
     }
 });
 

@@ -40,7 +40,7 @@ const login = async (req, res, next)=>{
             role: user.role,
             name: user.name
         };
-        jwt.sign(claims, 'bearer', {expiresIn:'1d'},(err, token)=>{
+        jwt.sign(claims, process.env.JWT_SECRET, {expiresIn:'1d'},(err, token)=>{
             if(err){
                 return res.status(500).json({
                     status:'error',

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const {ObjectID} = require("mongodb");
+
 
 const userSchema = new mongoose.Schema({
     name :{
@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
     services:[
         {
             serviceID:{
-                type: ObjectID,
+                type: mongoose.Types.ObjectId,
                 trim: true
             }
         }

@@ -1,4 +1,3 @@
-const {ObjectID} = require('mongodb');
 const mongoose = require ('mongoose');
 
 const serviceSchema = new mongoose.Schema({
@@ -27,12 +26,12 @@ const serviceSchema = new mongoose.Schema({
         trim: true
     },
     categoryID: {
-        type: ObjectID,
+        type: mongoose.Types.ObjectId,
         required: [true, 'Category ID required'],
         trim: true
     },
     providerID: {
-        type: ObjectID,
+        type: mongoose.Types.ObjectId,
         required: [true, 'Provider ID required'],
         trim: true
     } 

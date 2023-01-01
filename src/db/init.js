@@ -8,14 +8,12 @@ require('../models/ManageService');
 require('../models/Servicecategory');
 require('../models/service');
 
-// const {
-//     DB_HOST,
-//     DB_PORT,
-//     DB_NAME
-// } = process.env;
-DB_HOST = 'localhost'
-DB_PORT = '27017'
-DB_NAME = 'doorservice' 
+const {
+    DB_HOST,
+    DB_PORT,
+    DB_NAME
+} = process.env;
+
 
 const connect = async ()=>{
     try {

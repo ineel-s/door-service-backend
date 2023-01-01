@@ -1,8 +1,6 @@
-
-const mongoose = require('mongoose');
-const ManageService = mongoose.model('ManageService');
-const Service = mongoose.model('Service');
-const User = mongoose.model('User');
+const ManageService = require('../services/manageservice.service');
+const Service = require('../services/services.service');
+const User = require('../services/user.service');
 
 const bookServicectrl = async(req,res)=>{
     try {
@@ -11,13 +9,13 @@ const bookServicectrl = async(req,res)=>{
         if(userID === providerID){
             throw new Error('Providers can not book Own Services')
         }
-        const service = await Service.findOne({
+        const service = await Service.getService({
             _id: serviceID
         });
-        const provider = await User.findOne({
+        const provider = await User.getUserProfile({
             _id: providerID
         });
-        const user = await User.findOne({
+        const user = await User.getUserProfile({
             _id: userID
         });
         if(!service || !provider || !provider.role=='provider' || !user){
@@ -29,7 +27,7 @@ const bookServicectrl = async(req,res)=>{
         req.body.serviceCost = total;
         req.body.userID = userID;
         console.log(req.body);
-        const booking = await ManageService.create(req.body);
+        const booking = await ManageService.newBooking(req.body);
         res.status(200).json({
             message: 'Service Requested Successfully',
             data : booking
