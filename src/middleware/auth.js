@@ -18,8 +18,9 @@ const authorize = ( ...roles ) => {
     return ( req, res, next ) => {
         const { role } = res.locals.claims;
         if( !roles.includes( role ) ) {
-            const err = new Error( 'You do not have sufficient privileges' );
-            err.name = Errors.Forbidden;
+            res.status(403).json({
+                message : 'You do not have sufficient privileges'
+            })
             return next( err );
         }
         next();

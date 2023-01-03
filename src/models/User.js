@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
     ]
 });
 
-const emailPat = /^[A-Za-z0-9_\.]+@(fynd|example)\.com$/;
+const emailPat = /^[A-Za-z0-9_\.]+@(fynd|example|gmail|yahoo)\.com$/;
 const passwordPat = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,16}$/;
 
 userSchema.path('email').validate(function (value) {
