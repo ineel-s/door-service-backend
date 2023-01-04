@@ -62,7 +62,7 @@ const UserbookingList = async (req,res)=>{
 const listAllBookings = async (req, res) => {
     try{
         // const _id = req.params.id;
-        const bookings = await ManageService.find({});
+        const bookings = await ManageService.getAllBookings();
         if(!bookings){
             throw new Error('Invalid request');
         }

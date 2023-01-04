@@ -11,7 +11,7 @@ const PORT = process.env.SERVER_PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: false}));
 app.use( cors({
-    origin: 'http://localhost:3001',
+    origin: ['http://localhost:3001' || 'http://192.168.2.17:3001'],
 }));
 app.use('/auth',require('./routes/auth.routes'));
 
