@@ -6,8 +6,33 @@ const newBooking = async(bookingdetails)=>{
 }
 
 const getAllBookings = async()=>{
-    return await Manageservice.find({});
+    return await Manageservice.aggregate([{
+        $lookup:{
+          from:"users",
+          localField:"userID",
+          foreignField:"_id",
+          as:"userdetails"
+        }
+      },
+      {
+        $lookup:{
+          from:"users",
+          localField:"providerID",
+          foreignField:"_id",
+          as:"provider"
+        }
+      },
+      {
+        $lookup:{
+          from:"services",
+          localField:"serviceID",
+          foreignField:"_id",
+          as:"service"
+        }
+      },
+      ]);
 }
+
 
 module.exports={
     newBooking,

@@ -14,5 +14,6 @@ router.get('/:id',ServiceCtrl.getServicectrl);
 router.get('/filter/:id',ServiceCtrl.filterServicebyCategoryctrl);
 router.patch('/:id', authenticate, authorize( 'admin' ),ServiceCtrl.updateServicectrl);
 router.delete('/:id', authenticate, authorize( 'admin' ),ServiceCtrl.deleteServicectrl);
+router.get('/scname/category',authenticate,ServiceCtrl.getscnamectrl);
 
 module.exports = router;

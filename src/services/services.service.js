@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const Service = mongoose.model('Service');
+// const category = mongoose.model('ServiceCategory')
 
 const addService = async(serviceBody)=>{
     return await Service.create(serviceBody);
@@ -26,11 +27,26 @@ const deleteService = async (_id)=>{
     return await Service.findByIdAndDelete(_id);
 }
 
+const getscname = async ()=>{
+    const s = await Service.aggregate([
+        {
+                $lookup:{
+                  from:"servicecategories",
+                  localField:"categoryID",
+                  foreignField:"_id",
+                  as:"cat"
+                }
+        }
+    ]);
+    return s;
+}
+
 module.exports={
     addService,
     allService,
     getService,
     updateService,
     filterServicebyCategory,
-    deleteService
+    deleteService,
+    getscname
 }

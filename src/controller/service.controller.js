@@ -114,11 +114,26 @@ const deleteServicectrl = async(req,res)=>{
     }
 };
 
+const getscnamectrl = async (req,res)=>{
+    // const categoryID = req.params.id
+    try{
+    const scname = await Service.getscname();
+    res.json({
+        data: scname
+    });
+}catch(error){
+    res.json({
+        message: error.message
+    })
+}
+}
+
 module.exports={
     addServicectrl,
     listServicesctrl,
     getServicectrl,
     updateServicectrl,
     filterServicebyCategoryctrl,
-    deleteServicectrl
+    deleteServicectrl,
+    getscnamectrl
 }

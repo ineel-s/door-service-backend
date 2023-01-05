@@ -11,6 +11,8 @@ const serviceSchema = new mongoose.Schema({
         required: [true, 'Price required'],
         trim: true
     },
+    image:{
+    },
     description: {
         type: String,
         trim: true

@@ -39,7 +39,8 @@ const login = async (req, res, next)=>{
             email:user.email,
             role: user.role,
             name: user.name,
-            id: user._id
+            id: user._id,
+            gender: user.gender
         };
         jwt.sign(claims, process.env.JWT_SECRET, {expiresIn:'1d'},(err, token)=>{
             if(err){
@@ -54,6 +55,7 @@ const login = async (req, res, next)=>{
                     role: user.role,
                     name:user.name,
                     id: user._id,
+                    gender: user.gender,
                     token
                 }
             );
