@@ -4,15 +4,6 @@ const Service = require('../services/services.service');
 
 
 
-const isProvider = async (_id)=>{
-    const user = await User.findUser(_id);
-    if(!user || user.role !=='provider'){
-        return Promise.reject();
-    }else{
-        return Promise.resolve();
-    }
-};
-
 const addServicectrl = async (req,res)=>{
     try{
         const service = await Service.addService(req.body);
@@ -22,7 +13,7 @@ const addServicectrl = async (req,res)=>{
         });
     }catch(error){
         res.status(501).json({
-            message : error.message
+            message : 'Service is Not Valid'
         })
     }
 };

@@ -12,6 +12,8 @@ const serviceSchema = new mongoose.Schema({
         trim: true
     },
     image:{
+        type:String,
+        default:'https://img.freepik.com/free-vector/plumber-repairing-pipe-burst-woman-phoning-service-stop-house-flooding_74855-14142.jpg?w=900&t=st=1672851899~exp=1672852499~hmac=78e7f48ac89a2e65f5ddbb82150bebf2d878c725a7cd7a1542fcd3e24093d55a'
     },
     description: {
         type: String,

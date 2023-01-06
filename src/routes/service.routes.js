@@ -8,7 +8,7 @@ const {
 
 const router = express.Router();
 
-router.post('/', authenticate, authorize( 'admin', 'provider' ),ServiceCtrl.addServicectrl);
+router.post('/', authenticate,ServiceCtrl.addServicectrl);
 router.get('/',ServiceCtrl.listServicesctrl);
 router.get('/:id',ServiceCtrl.getServicectrl);
 router.get('/filter/:id',ServiceCtrl.filterServicebyCategoryctrl);

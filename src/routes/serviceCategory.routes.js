@@ -11,5 +11,5 @@ router.post('/', authenticate, authorize( 'admin', 'provider'),ServiceCategoryCt
 router.get('/',ServiceCategoryCtrl.getAllServiceCategoryctrl);
 router.get('/:id',ServiceCategoryCtrl.getServiceCategoryctrl)
 router.patch('/:id', authenticate, authorize( 'admin' ),ServiceCategoryCtrl.updateServiceCategoryctrl);
-router.delete('/:id',ServiceCategoryCtrl.deleteServiceCategoryctrl)
+router.delete('/:id',authenticate , authorize('admin'),ServiceCategoryCtrl.deleteServiceCategoryctrl)
 module.exports = router;
