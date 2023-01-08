@@ -35,7 +35,6 @@ const manageServiceSchema = new mongoose.Schema({
         enum:[
             'Requested',
             'Accepted',
-            'Confirmed',
             'Success',
             'Cancelled',
         ],
@@ -54,6 +53,10 @@ const manageServiceSchema = new mongoose.Schema({
     isCanceledBy: {
         type: String,
         enum: ['customer', 'provider', 'admin',]
+    },
+    serviceAddress:{
+        type: String,
+        required: [true, 'Service address required']
     }
 });
 

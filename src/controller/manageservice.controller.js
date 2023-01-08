@@ -48,6 +48,7 @@ const UserbookingList = async (req,res)=>{
         if(!bookings){
             throw new Error('Invalid request')
         }
+
         res.status(200).json({
             message : 'Your Bookings',
             bookings
@@ -76,9 +77,31 @@ const listAllBookings = async (req, res) => {
         });
     }
 };
+const updateBookingctrl=async(req,res)=>{
+    try {
+        const _id=req.params.id;
+        const updateData = req.body;
+        const updateDetails = await ManageService.updateBooking(_id, updateData);
+
+        if(!updateDetails){
+            throw new Error('Invalid request');
+        }
+        res.status(201).json({
+            message:'Updated Successfully',
+            updateDetails
+        })
+        
+    } catch (error) {
+        res.status(501).json({
+            message:error.message
+        })
+        
+    }
+}
 
 module.exports = {
     bookServicectrl,
     UserbookingList,
-    listAllBookings
+    listAllBookings,
+    updateBookingctrl
 }

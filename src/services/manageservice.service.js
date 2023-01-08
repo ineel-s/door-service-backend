@@ -5,6 +5,9 @@ const newBooking = async(bookingdetails)=>{
     return await Manageservice.create(bookingdetails);
 }
 
+const updateBooking = async (_id, updateDetails)=>{
+  return await Manageservice.findByIdAndUpdate(_id, updateDetails);
+}
 const getAllBookings = async()=>{
     return await Manageservice.aggregate([
       {
@@ -35,7 +38,9 @@ const getAllBookings = async()=>{
 }
 
 
+
 module.exports={
     newBooking,
-    getAllBookings
+    getAllBookings,
+    updateBooking,
 }

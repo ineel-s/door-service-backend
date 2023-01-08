@@ -38,7 +38,7 @@ app.use(function (req, res, next) {
 connect()
     .then(() => {
         app.listen(PORT, () => {
-            console.log(`server started on - http://localhost:${PORT}`);
+            console.log(`server started`);
         });
     })
     .catch(error => {
