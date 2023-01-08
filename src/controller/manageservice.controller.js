@@ -26,7 +26,6 @@ const bookServicectrl = async(req,res)=>{
 
         req.body.serviceCost = total;
         req.body.userID = userID;
-        console.log(req.body);
         const booking = await ManageService.newBooking(req.body);
         res.status(200).json({
             message: 'Service Requested Successfully',
@@ -86,7 +85,7 @@ const updateBookingctrl=async(req,res)=>{
         if(!updateDetails){
             throw new Error('Invalid request');
         }
-        res.status(201).json({
+        res.status(200).json({
             message:'Updated Successfully',
             updateDetails
         })
