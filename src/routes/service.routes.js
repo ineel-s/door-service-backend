@@ -15,5 +15,6 @@ router.get('/filter/:id',ServiceCtrl.filterServicebyCategoryctrl);
 router.patch('/:id', authenticate, authorize( 'admin' ),ServiceCtrl.updateServicectrl);
 router.delete('/:id', authenticate, authorize( 'admin' ),ServiceCtrl.deleteServicectrl);
 router.get('/scname/category',ServiceCtrl.getscnamectrl);
+router.get('/booking/mounted',authenticate,ServiceCtrl.preBookingctrl)
 
 module.exports = router;

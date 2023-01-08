@@ -28,7 +28,7 @@ const deleteService = async (_id)=>{
 }
 
 const getscname = async ()=>{
-    const s = await Service.aggregate([
+    const categoryName = await Service.aggregate([
         {
                 $lookup:{
                   from:"servicecategories",
@@ -38,7 +38,29 @@ const getscname = async ()=>{
                 }
         }
     ]);
-    return s;
+    return categoryName;
+}
+const preBooking = async()=>{
+    const preBookingData = await Service.aggregate([
+        
+        {
+            $lookup:{
+                from:'users',
+                localField:'providerID',
+                foreignField:'_id',
+                as:'provider'
+            }
+        },
+        {
+            $lookup:{
+                from:"servicecategories",
+                localField:"categoryID",
+                foreignField:"_id",
+                as:"category"
+              }
+        },
+    ]);
+    return preBookingData;
 }
 
 module.exports={
@@ -48,5 +70,6 @@ module.exports={
     updateService,
     filterServicebyCategory,
     deleteService,
-    getscname
+    getscname,
+    preBooking
 }

@@ -1,4 +1,3 @@
-const User = require('../services/auth.service');
 const Service = require('../services/services.service');
 
 
@@ -109,14 +108,34 @@ const getscnamectrl = async (req,res)=>{
     // const categoryID = req.params.id
     try{
     const scname = await Service.getscname();
-    res.json({
+    res.status(200).json({
         data: scname
     });
 }catch(error){
-    res.json({
+    res.status(501).json({
         message: error.message
     })
 }
+};
+
+const preBookingctrl = async(req,res)=>{
+    try {
+        const preBookingData = await Service.preBooking();
+        if(preBookingData){
+            res.status(200).json({
+                message:'Data Served',
+                data:preBookingData
+            });
+        }else{
+            res.status(404).json({
+                message:`Service is not found`
+            });
+        }
+    } catch (error) {
+        res.json({
+            message:error.message
+        })
+    }
 }
 
 module.exports={
@@ -126,5 +145,6 @@ module.exports={
     updateServicectrl,
     filterServicebyCategoryctrl,
     deleteServicectrl,
-    getscnamectrl
+    getscnamectrl,
+    preBookingctrl
 }

@@ -6,7 +6,8 @@ const newBooking = async(bookingdetails)=>{
 }
 
 const getAllBookings = async()=>{
-    return await Manageservice.aggregate([{
+    return await Manageservice.aggregate([
+      {
         $lookup:{
           from:"users",
           localField:"userID",
