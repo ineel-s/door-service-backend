@@ -17,6 +17,10 @@ const manageServiceSchema = new mongoose.Schema({
         required: [true,'ServiceID required'],
         trim:true
     },
+    currentDate:{
+        type: Date,
+        default:Date.now()
+    },
     bookingDate: {
         type: Date,
         default: Date.now()

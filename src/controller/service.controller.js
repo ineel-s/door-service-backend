@@ -1,18 +1,33 @@
 const Service = require('../services/services.service');
 
-
+const stripe = require('stripe')('sk_test_51MQcneSJ9A0k3bp1kqaOSR3oNlKCpE1hvFSjAIYz5iUG57UkS5QSKqDPt0mfGCyKKFO0YmlmV7Oj6tSOG2OFWcGb00GwtGczK1');
 
 
 const addServicectrl = async (req,res)=>{
     try{
-        const service = await Service.addService(req.body);
+       const serviceName = req.body.name;
+        const servicePrice = req.body.price;
+        let gst = servicePrice * 0.18;
+        const total = servicePrice + gst;
+        const product = await stripe.products.create({
+            name:serviceName,
+            default_price_data:{
+                currency:'INR',
+                unit_amount_decimal:(total*100)
+            }
+          });
+        const request = {
+            stripePrice:product.default_price,
+            ...req.body
+        }
+        const service = await Service.addService(request);
         res.status(200).json({
             message:'Service Added',
             data: service
         });
     }catch(error){
         res.status(501).json({
-            message : 'Service is Not Valid'
+            message : error.message
         })
     }
 };

@@ -97,7 +97,6 @@ const updateBookingctrl=async(req,res)=>{
         
     }
 }
-
 module.exports = {
     bookServicectrl,
     UserbookingList,

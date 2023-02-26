@@ -38,7 +38,10 @@ const serviceSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         required: [true, 'Provider ID required'],
         trim: true
-    } 
+    },
+    stripePrice:{
+        type:String,
+    }
 });
 
 mongoose.model('Service',serviceSchema);
