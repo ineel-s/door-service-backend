@@ -21,7 +21,7 @@ const bookServicectrl = async(req,res)=>{
         if(!service || !provider || !provider.role=='provider' || !user){
             throw new Error('Invalid Request');
         }
-        let gst = service.price * 0.18 ;
+        let gst = service.price * 0.08 ;
         const total = service.price + gst;
 
         req.body.serviceCost = total;

@@ -6,9 +6,11 @@ const stripe = require('stripe')('sk_test_51MQcneSJ9A0k3bp1kqaOSR3oNlKCpE1hvFSjA
 const addServicectrl = async (req,res)=>{
     try{
        const serviceName = req.body.name;
-        const servicePrice = req.body.price;
-        let gst = servicePrice * 0.18;
+        const servicePrice = parseInt(req.body.price);
+
+        let gst = servicePrice * 0.08;
         const total = servicePrice + gst;
+        console.log(total);
         const product = await stripe.products.create({
             name:serviceName,
             default_price_data:{
