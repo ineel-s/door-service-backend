@@ -5,6 +5,10 @@ const newBooking = async(bookingdetails)=>{
     return await Manageservice.create(bookingdetails);
 }
 
+const deleteBookingDetailes =  async(id)=>{
+  return await Manageservice.findByIdAndDelete(id);
+}
+
 const updateBooking = async (_id, updateDetails)=>{
   return await Manageservice.findByIdAndUpdate(_id, updateDetails);
 }
@@ -37,10 +41,9 @@ const getAllBookings = async()=>{
       ]);
 }
 
-
-
 module.exports={
     newBooking,
     getAllBookings,
     updateBooking,
+    deleteBookingDetailes,
 }

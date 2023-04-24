@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema({
                 trim: true
             }
         }
-    ]
+    ],
 });
 
 const emailPat = /^[A-Za-z0-9_\.]+@(fynd|example|gmail|yahoo)\.com$/;

@@ -97,9 +97,29 @@ const updateBookingctrl=async(req,res)=>{
         
     }
 }
+
+const deleteBookingDetailesctrl = async(req,res)=>{
+    try {
+       const _id = req.params.id;
+       const deleteBookings = await ManageService.deleteBookingDetailes(_id);
+       if(!deleteBookings){
+        throw new Error("Invalid Request");
+       }
+       res.status(200).json({
+        message:'Booking Details Deleted!',
+        deleteBookings
+       })
+
+    } catch (error) {
+        res.status(501).json({
+            message:error.message
+        })
+    }
+}
 module.exports = {
     bookServicectrl,
     UserbookingList,
     listAllBookings,
-    updateBookingctrl
+    updateBookingctrl,
+    deleteBookingDetailesctrl
 }
