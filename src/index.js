@@ -2,7 +2,6 @@ JWT_SECRET = require('dotenv').config();
 
 const path = require('path')
 const express = require('express');
-const multer = require('multer');
 const app = express();
 
 
