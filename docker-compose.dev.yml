@@ -1,0 +1,23 @@
+# Development override file
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DEBUG=app:*
+    command: npm start
+    ports:
+      - "3000:3000"
+
+  mongo:
+    ports:
+      - "27017:27017"

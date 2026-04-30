@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: door-service-backend
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DB_HOST=${DB_HOST:-mongo}
+      - DB_PORT=${DB_PORT:-27017}
+      - DB_NAME=${DB_NAME:-door-service}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - SERVER_PORT=${SERVER_PORT:-3000}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_here}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+    depends_on:
+      - mongo
+    networks:
+      - door-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6
+    container_name: door-service-mongo
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER:-root}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-password}
+    networks:
+      - door-network
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo_data:
+
+networks:
+  door-network:
+    driver: bridge
