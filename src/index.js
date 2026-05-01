@@ -15,22 +15,10 @@ const PORT = process.env.SERVER_PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+if (process.env.NODE_ENV === 'development') {
+    app.use(cors());
+}
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        if (origin === 'https://door-service-backend-latest.onrender.com/' || process.env.NODE_ENV === 'development') {
-            return callback(null, true);
-        }
-        // For production, if you have a specific domain for your frontend
-        // if (origin === 'https://your-production-frontend.com') {
-        //     return callback(null, true);
-        // }
-        callback(new Error('Not allowed by CORS'));
-    }
-};
-
-app.use(cors(corsOptions));
 
 app.use('/auth', require('./routes/auth.routes'));
 
