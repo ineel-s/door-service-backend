@@ -144,6 +144,72 @@ jobs:
           echo "✅ DigitalOcean deployment triggered"
 
       # ============================================
+      # Option 5: Render.com Deployment
+      # ============================================
+      - name: Deploy to Render
+        if: ${{ secrets.RENDER_API_KEY != '' && secrets.RENDER_SERVICE_ID != '' }}
+        run: |
+          SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
+          API_KEY="${{ secrets.RENDER_API_KEY }}"
+          IMAGE_URL="${{ steps.image.outputs.image }}"
+          
+          echo "📦 Deploying to Render..."
+          echo "Service ID: $SERVICE_ID"
+          echo "Image: $IMAGE_URL"
+          
+          # Trigger Render deployment via API
+          RESPONSE=$(curl -X POST \
+            "https://api.render.com/deploy/$SERVICE_ID?key=$API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"imageUrl\": \"$IMAGE_URL\"
+            }" \
+            -w "\n%{http_code}" \
+            -s)
+          
+          # Extract HTTP status code (last line)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "Response: $BODY"
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "201" ]]; then
+            echo "✅ Render deployment triggered successfully"
+            echo ""
+            echo "Your app will be redeployed shortly at:"
+            echo "https://$SERVICE_ID.onrender.com"
+          else
+            echo "❌ Render deployment failed"
+            echo "Make sure RENDER_API_KEY and RENDER_SERVICE_ID are correct"
+            exit 1
+          fi
+
+      # Alternative: Simple Render Webhook Trigger (Recommended for automatic Git-based deployments)
+      - name: Trigger Render Webhook
+        if: ${{ secrets.RENDER_WEBHOOK_URL != '' && secrets.RENDER_API_KEY == '' }}
+        run: |
+          echo "📢 Triggering Render webhook..."
+          
+          WEBHOOK_RESPONSE=$(curl -X POST \
+            "${{ secrets.RENDER_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -s)
+          
+          HTTP_CODE=$(echo "$WEBHOOK_RESPONSE" | tail -n 1)
+          BODY=$(echo "$WEBHOOK_RESPONSE" | head -n -1)
+          
+          echo "Response: $BODY"
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [[ "$HTTP_CODE" == "200" ]] || [[ "$HTTP_CODE" == "204" ]]; then
+            echo "✅ Render webhook triggered - deployment started"
+          else
+            echo "⚠️  Webhook response: $HTTP_CODE"
+          fi
+
+      # ============================================
       # Notifications
       # ============================================
       - name: Notify Slack - Success
