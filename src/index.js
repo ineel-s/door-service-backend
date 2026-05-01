@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: false }));
 const corsOptions = {
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
-        if (origin === 'http://localhost:3000' || process.env.NODE_ENV === 'development') {
+        if (origin === 'https://door-service-backend-latest.onrender.com/' || process.env.NODE_ENV === 'development') {
             return callback(null, true);
         }
         // For production, if you have a specific domain for your frontend
