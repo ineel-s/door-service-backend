@@ -1,0 +1,95 @@
+# Production Docker Compose Configuration
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# This file extends the base docker-compose.yml with production-specific settings
+
+version: '3.8'
+
+services:
+  app:
+    # Use pre-built image instead of building
+    image: ghcr.io/your-username/door-service-backend:latest
+    # Override with production settings
+    restart: always
+    environment:
+      # Production environment
+      NODE_ENV: production
+      # Database config - use external MongoDB if available
+      DB_HOST: ${DB_HOST:-mongo}
+      DB_PORT: ${DB_PORT:-27017}
+      DB_NAME: ${DB_NAME:-door-service}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SERVER_PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=door-backend"
+    # Security: run as non-root (requires Dockerfile changes)
+    # user: "node"
+    labels:
+      - "com.example.service=door-backend"
+      - "com.example.environment=production"
+
+  mongo:
+    image: mongo:6
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+    # Persistence with backup location
+    volumes:
+      - mongo_data:/data/db
+      - ./backups:/data/backups
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
+        reservations:
+          cpus: '1'
+          memory: 512M
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "com.example.service=door-mongo"
+      - "com.example.environment=production"
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  door-network:
+    driver: bridge

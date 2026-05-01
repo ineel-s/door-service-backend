@@ -1,0 +1,195 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get Docker image tag
+        id: image
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG=${GITHUB_REF#refs/tags/}
+          else
+            TAG=latest
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "image=${{ secrets.DOCKERHUB_USERNAME }}/door-service-backend:$TAG" >> $GITHUB_OUTPUT
+
+      # ============================================
+      # Option 1: Deploy via SSH to VPS/Server
+      # ============================================
+      - name: Deploy to Server via SSH
+        if: ${{ secrets.DEPLOY_HOST != '' }}
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            # Navigate to app directory
+            cd ${{ secrets.DEPLOY_PATH || '/home/ubuntu/door-service' }}
+            
+            # Pull the latest Docker image
+            docker pull ${{ steps.image.outputs.image }}
+            
+            # Stop and remove old container
+            docker-compose down || true
+            
+            # Start new container
+            docker-compose up -d
+            
+            # Show running containers
+            echo "✅ Deployment successful! Running containers:"
+            docker ps
+            
+            # Check application health
+            sleep 5
+            curl -s http://localhost:3000/health || echo "⚠️ Health check URL may need adjustment"
+
+      # ============================================
+      # Option 2: AWS ECS Deployment
+      # ============================================
+      - name: Deploy to AWS ECS
+        if: ${{ secrets.AWS_CLUSTER_NAME != '' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+        run: |
+          aws configure set region $AWS_REGION
+          
+          # Update ECS service with new image
+          aws ecs update-service \
+            --cluster ${{ secrets.AWS_CLUSTER_NAME }} \
+            --service ${{ secrets.AWS_SERVICE_NAME }} \
+            --force-new-deployment \
+            --region $AWS_REGION
+          
+          echo "✅ AWS ECS deployment triggered"
+
+      # ============================================
+      # Option 3: Azure Container Instances
+      # ============================================
+      - name: Deploy to Azure
+        if: ${{ secrets.AZURE_RESOURCE_GROUP != '' }}
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy Container to Azure
+        if: ${{ secrets.AZURE_RESOURCE_GROUP != '' }}
+        run: |
+          az container create \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name door-service-backend \
+            --image ${{ steps.image.outputs.image }} \
+            --cpu 1 \
+            --memory 1 \
+            --environment-variables \
+              NODE_ENV=production \
+              DB_HOST=${{ secrets.DB_HOST }} \
+              DB_PORT=27017 \
+              DB_NAME=door-service \
+              SERVER_PORT=3000 \
+            --ports 3000 \
+            --restart-policy Always \
+            --registry-login-server docker.io \
+            --registry-username ${{ secrets.DOCKERHUB_USERNAME }} \
+            --registry-password ${{ secrets.DOCKERHUB_TOKEN }}
+          
+          echo "✅ Azure deployment triggered"
+
+      # ============================================
+      # Option 4: DigitalOcean App Platform
+      # ============================================
+      - name: Deploy to DigitalOcean
+        if: ${{ secrets.DIGITALOCEAN_TOKEN != '' }}
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+        run: |
+          # Install doctl CLI
+          cd ~
+          wget https://github.com/digitalocean/doctl/releases/download/v1.94.0/doctl-1.94.0-linux-x64.tar.gz
+          tar xf ~/doctl-1.94.0-linux-x64.tar.gz
+          sudo mv ~/doctl /usr/local/bin
+          
+          # Update app with new image
+          doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
+          doctl apps update ${{ secrets.DIGITALOCEAN_APP_ID }} --image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/door-service-backend:${{ steps.image.outputs.tag }}
+          
+          echo "✅ DigitalOcean deployment triggered"
+
+      # ============================================
+      # Notifications
+      # ============================================
+      - name: Notify Slack - Success
+        if: success() && secrets.SLACK_WEBHOOK != ''
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "✅ Deployment Successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Successful* ✅\n*Environment:* ${{ github.event.inputs.environment || 'production' }}\n*Image:* `${{ steps.image.outputs.image }}`\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                  }
+                }
+              ]
+            }
+
+      - name: Notify Slack - Failure
+        if: failure() && secrets.SLACK_WEBHOOK != ''
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "❌ Deployment Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Failed* ❌\n*Environment:* ${{ github.event.inputs.environment || 'production' }}\n*Check:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Workflow Logs>"
+                  }
+                }
+              ]
+            }
+
+      - name: Deployment Summary
+        run: |
+          echo "═══════════════════════════════════════════"
+          echo "📦 Deployment Summary"
+          echo "═══════════════════════════════════════════"
+          echo "Image: ${{ steps.image.outputs.image }}"
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "Status: ${{ job.status }}"
+          echo "═══════════════════════════════════════════"
