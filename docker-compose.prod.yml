@@ -10,6 +10,13 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
     command: node src/index.js
     restart: always
     # Remove volumes in production
