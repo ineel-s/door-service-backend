@@ -20,7 +20,6 @@ const {
 const connectionStr = NODE_ENV ==='development'? `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`:
 `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`;
 
-
 const connect = async ()=>{
     try {
         await mongoose.connect(connectionStr);
