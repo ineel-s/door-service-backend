@@ -17,6 +17,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
     command: node src/index.js
     restart: always
     # Remove volumes in production

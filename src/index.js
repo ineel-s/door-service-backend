@@ -18,7 +18,12 @@ app.use(express.urlencoded({ extended: false }));
 if (process.env.NODE_ENV === 'development') {
     app.use(cors());
 }
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+app.use(cors({
+  origin: allowedOrigin,
+  optionsSuccessStatus: 200
+}));
 
 app.use('/auth', require('./routes/auth.routes'));
 
