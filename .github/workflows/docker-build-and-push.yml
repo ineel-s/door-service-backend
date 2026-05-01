@@ -3,13 +3,13 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main
+      - master
       - RELEASE_2.0.0
     tags:
       - 'v*.*.*'
   pull_request:
     branches:
-      - main
+      - master
       - RELEASE_2.0.0
 
 jobs:
