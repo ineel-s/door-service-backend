@@ -14,11 +14,11 @@ on:
 
 jobs:
   sonarqube-analysis:
-    [cite_start]uses: ./.github/workflows/sonar.yml # Path to your reusable file [cite: 436, 439]
-    [cite_start]secrets: inherit # Pass SONAR_TOKEN to the reusable workflow
+    uses: ./.github/workflows/sonar.yml
+    secrets: inherit
   build-and-push:
     runs-on: ubuntu-latest
-    [cite_start]needs: sonarqube-analysis # Only runs if sonar scan passes [cite: 314, 329, 420]
+    needs: sonarqube-analysis
     permissions:
       contents: read
       packages: write
