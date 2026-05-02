@@ -39,11 +39,64 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "image=${{ secrets.DOCKERHUB_USERNAME }}/door-service-backend:$TAG" >> $GITHUB_OUTPUT
 
+      # Check which deployment options are available
+      - name: Check deployment secrets
+        id: secrets
+        run: |
+          # Check SSH deployment
+          if [ -n "${{ secrets.DEPLOY_HOST }}" ] && [ -n "${{ secrets.DEPLOY_USER }}" ] && [ -n "${{ secrets.DEPLOY_SSH_KEY }}" ]; then
+            echo "ssh_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "ssh_available=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check AWS deployment
+          if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ] && [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] && [ -n "${{ secrets.AWS_CLUSTER_NAME }}" ]; then
+            echo "aws_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "aws_available=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check Azure deployment
+          if [ -n "${{ secrets.AZURE_CREDENTIALS }}" ] && [ -n "${{ secrets.AZURE_RESOURCE_GROUP }}" ]; then
+            echo "azure_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "azure_available=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check DigitalOcean deployment
+          if [ -n "${{ secrets.DIGITALOCEAN_TOKEN }}" ] && [ -n "${{ secrets.DIGITALOCEAN_APP_ID }}" ]; then
+            echo "digitalocean_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "digitalocean_available=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check Render API deployment
+          if [ -n "${{ secrets.RENDER_API_KEY }}" ] && [ -n "${{ secrets.RENDER_SERVICE_ID }}" ]; then
+            echo "render_api_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "render_api_available=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check Render webhook deployment
+          if [ -n "${{ secrets.RENDER_WEBHOOK_URL }}" ] && [ -z "${{ secrets.RENDER_API_KEY }}" ]; then
+            echo "render_webhook_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "render_webhook_available=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check Slack notifications
+          if [ -n "${{ secrets.SLACK_WEBHOOK }}" ]; then
+            echo "slack_available=true" >> $GITHUB_OUTPUT
+          else
+            echo "slack_available=false" >> $GITHUB_OUTPUT
+          fi
+
       # ============================================
       # Option 1: Deploy via SSH to VPS/Server
       # ============================================
       - name: Deploy to Server via SSH
-        if: ${{ secrets.DEPLOY_HOST != '' }}
+        if: ${{ steps.secrets.outputs.ssh_available == 'true' }}
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -74,7 +127,7 @@ jobs:
       # Option 2: AWS ECS Deployment
       # ============================================
       - name: Deploy to AWS ECS
-        if: ${{ secrets.AWS_CLUSTER_NAME != '' }}
+        if: ${{ steps.secrets.outputs.aws_available == 'true' }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -95,13 +148,13 @@ jobs:
       # Option 3: Azure Container Instances
       # ============================================
       - name: Deploy to Azure
-        if: ${{ secrets.AZURE_RESOURCE_GROUP != '' }}
+        if: ${{ steps.secrets.outputs.azure_available == 'true' }}
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
       - name: Deploy Container to Azure
-        if: ${{ secrets.AZURE_RESOURCE_GROUP != '' }}
+        if: ${{ steps.secrets.outputs.azure_available == 'true' }}
         run: |
           az container create \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
@@ -127,7 +180,7 @@ jobs:
       # Option 4: DigitalOcean App Platform
       # ============================================
       - name: Deploy to DigitalOcean
-        if: ${{ secrets.DIGITALOCEAN_TOKEN != '' }}
+        if: ${{ steps.secrets.outputs.digitalocean_available == 'true' }}
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
         run: |
@@ -147,7 +200,7 @@ jobs:
       # Option 5: Render.com Deployment
       # ============================================
       - name: Deploy to Render
-        if: ${{ secrets.RENDER_API_KEY != '' && secrets.RENDER_SERVICE_ID != '' }}
+        if: ${{ steps.secrets.outputs.render_api_available == 'true' }}
         run: |
           SERVICE_ID="${{ secrets.RENDER_SERVICE_ID }}"
           API_KEY="${{ secrets.RENDER_API_KEY }}"
@@ -187,7 +240,7 @@ jobs:
 
       # Alternative: Simple Render Webhook Trigger (Recommended for automatic Git-based deployments)
       - name: Trigger Render Webhook
-        if: ${{ secrets.RENDER_WEBHOOK_URL != '' && secrets.RENDER_API_KEY == '' }}
+        if: ${{ steps.secrets.outputs.render_webhook_available == 'true' }}
         run: |
           echo "📢 Triggering Render webhook..."
           
@@ -213,7 +266,7 @@ jobs:
       # Notifications
       # ============================================
       - name: Notify Slack - Success
-        if: success() && secrets.SLACK_WEBHOOK != ''
+        if: success() && steps.secrets.outputs.slack_available == 'true'
         uses: slackapi/slack-github-action@v1.24.0
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
@@ -232,7 +285,7 @@ jobs:
             }
 
       - name: Notify Slack - Failure
-        if: failure() && secrets.SLACK_WEBHOOK != ''
+        if: failure() && steps.secrets.outputs.slack_available == 'true'
         uses: slackapi/slack-github-action@v1.24.0
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
