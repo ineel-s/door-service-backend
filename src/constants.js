@@ -6,7 +6,7 @@ const Errors = {
     ValidationError: 'ValidationError',
     Unauthorized: 'Unauthorized',
     InternalServerError: 'InternalServerError',
-    Forbidden: 'Forbidden'
+    Forbidden: 'Forbidden Error'
 };
 
 module.exports = {
